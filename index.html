@@ -234,7 +234,7 @@
         <div class="chips" id="value">
           <label class="chip"><input type="radio" name="value" value="Впечатления и эмоции"><span>Впечатления и эмоции</span></label>
           <label class="chip"><input type="radio" name="value" value="Практичные и полезные вещи"><span>Практичные и полезные вещи</span></label>
-          <label class="chip"><input type="radio" name="value" value="И то, и другое по настроению"><span>И то, и другое по настроению</span></label>
+          <label class="chip"><input type="radio" name="value" value="По-разному: и то, и другое"><span>По-разному: и то, и другое</span></label>
         </div>
       </div>
       <div class="q">
@@ -246,8 +246,8 @@
         </div>
       </div>
       <div class="q">
-        <label class="q-label" for="relax">Как расслабляешься</label>
-        <input type="text" id="relax">
+        <label class="q-label" for="relax">Чем наполняешь себя, когда нужно отдохнуть</label>
+        <input type="text" id="relax" placeholder="Прогулка, ванна, сериал, спортзал, тишина, музыка...">
       </div>
       <div class="q">
         <label class="q-label" for="recharge">Что тебя перезагружает и наполняет</label>
@@ -270,8 +270,12 @@
         <textarea id="meaning" placeholder="История, качество, смысл, простота, красота..."></textarea>
       </div>
       <div class="q">
+        <label class="q-label" for="limits">Ограничения: аллергии, непереносимость, запреты</label>
+        <textarea id="limits" placeholder="Орехи, лактоза, запахи, материалы..."></textarea>
+      </div>
+      <div class="q">
         <label class="q-label" for="avoid">Что не любишь, что раздражает или чего избегаешь</label>
-        <textarea id="avoid" placeholder="Аллергии, запахи, темы, материалы, форматы..."></textarea>
+        <textarea id="avoid" placeholder="Темы, форматы, привычки, атмосфера..."></textarea>
       </div>
       <div class="q">
         <label class="q-label" for="dream">Желания или планы, которые давно откладываешь</label>
@@ -299,11 +303,12 @@
       <div class="s-block"><div class="s-title">Стиль</div><div class="s-content" id="s-style"><span class="empty">не указано</span></div></div>
       <div class="s-block"><div class="s-title">Что важнее</div><div class="s-content" id="s-value"><span class="empty">не указано</span></div></div>
       <div class="s-block"><div class="s-title">Темп жизни</div><div class="s-content" id="s-temper"><span class="empty">не указано</span></div></div>
-      <div class="s-block"><div class="s-title">Расслабление</div><div class="s-content" id="s-relax"><span class="empty">не указано</span></div></div>
+      <div class="s-block"><div class="s-title">Чем наполняется</div><div class="s-content" id="s-relax"><span class="empty">не указано</span></div></div>
       <div class="s-block"><div class="s-title">Перезагрузка</div><div class="s-content" id="s-recharge"><span class="empty">не указано</span></div></div>
       <div class="s-block"><div class="s-title">Забирает энергию</div><div class="s-content" id="s-energy"><span class="empty">не указано</span></div></div>
       <div class="s-block"><div class="s-title">Радует</div><div class="s-content" id="s-joy"><span class="empty">не указано</span></div></div>
       <div class="s-block"><div class="s-title">Важно в вещах</div><div class="s-content" id="s-meaning"><span class="empty">не указано</span></div></div>
+      <div class="s-block"><div class="s-title">Ограничения</div><div class="s-content" id="s-limits"><span class="empty">не указано</span></div></div>
       <div class="s-block"><div class="s-title">Не любит</div><div class="s-content" id="s-avoid"><span class="empty">не указано</span></div></div>
       <div class="s-block"><div class="s-title">Отложенные желания</div><div class="s-content" id="s-dream"><span class="empty">не указано</span></div></div>
       <div class="s-block"><div class="s-title">Что значит забота</div><div class="s-content" id="s-care"><span class="empty">не указано</span></div></div>
@@ -376,6 +381,7 @@
     setBlock('s-energy', textOrEmpty('energy'));
     setBlock('s-joy', textOrEmpty('joy'));
     setBlock('s-meaning', textOrEmpty('meaning'));
+    setBlock('s-limits', textOrEmpty('limits'));
     setBlock('s-avoid', textOrEmpty('avoid'));
     setBlock('s-dream', textOrEmpty('dream'));
     setBlock('s-care', textOrEmpty('care'));
@@ -390,7 +396,6 @@
     const btn = document.getElementById('btnPdf');
     const card = document.getElementById('summaryCard');
 
-    // Собираем автономный HTML для печати
     const styles = `
       <style>
         @page { size: A4; margin: 18mm 16mm; }
@@ -431,7 +436,6 @@
     const contentHtml = card.outerHTML;
     const fullHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Профиль предпочтений</title>' + styles + '</head><body>' + contentHtml + '</body></html>';
 
-    // Создаём скрытый iframe
     const iframe = document.createElement('iframe');
     iframe.style.position = 'fixed';
     iframe.style.right = '0';
@@ -448,7 +452,6 @@
       doc.write(fullHtml);
       doc.close();
 
-      // Ждём загрузки и вызываем печать
       const doPrint = () => {
         try{
           iframe.contentWindow.focus();
@@ -458,7 +461,6 @@
           console.error(e);
           flashButton(btn, 'Ошибка печати', 'err');
         }
-        // Убираем iframe чуть позже, чтобы диалог успел открыться
         setTimeout(() => {
           if(iframe.parentNode) iframe.parentNode.removeChild(iframe);
         }, 1500);
@@ -476,7 +478,7 @@
     }
   }
 
-  /* ===== Копирование текстом (без navigator.clipboard) ===== */
+  /* ===== Копирование текстом ===== */
   function buildPlainText(){
     const get = id => {
       const el = document.getElementById(id);
@@ -490,11 +492,12 @@
       ['Стиль', 's-style'],
       ['Что важнее', 's-value'],
       ['Темп жизни', 's-temper'],
-      ['Расслабление', 's-relax'],
+      ['Чем наполняется', 's-relax'],
       ['Перезагрузка', 's-recharge'],
       ['Забирает энергию', 's-energy'],
       ['Радует', 's-joy'],
       ['Важно в вещах', 's-meaning'],
+      ['Ограничения', 's-limits'],
       ['Не любит', 's-avoid'],
       ['Отложенные желания', 's-dream'],
       ['Что значит забота', 's-care']
@@ -515,7 +518,6 @@
       return;
     }
 
-    // Универсальный способ — работает и в file://, и в https://
     const ta = document.createElement('textarea');
     ta.value = text;
     ta.setAttribute('readonly', '');
@@ -546,7 +548,6 @@
     if(ok){
       flashButton(btn, 'Скопировано ✓', 'ok');
     } else {
-      // Последний шанс — модалка с текстом для ручного копирования
       showManualCopy(text);
       flashButton(btn, 'Скопируй вручную', 'err');
     }
