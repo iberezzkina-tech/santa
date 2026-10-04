@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Анкета предпочтений</title>
+<style>
+  :root{
+    --bg:#fdf2f6;
+    --card:#ffffff;
+    --text:#2a1f26;
+    --muted:#8a7380;
+    --line:#f0d8e2;
+    --accent:#d94f8a;
+    --accent-soft:#fce4ee;
+    --accent-dark:#b83a6e;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.55;
+    padding:32px 16px 72px;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  header{
+    margin-bottom:28px;
+    border-bottom:2px solid var(--accent);
+    padding-bottom:18px;
+  }
+  header h1{font-size:22px;margin:0 0 6px;letter-spacing:-.01em;}
+  header p{color:var(--muted);margin:0;font-size:14px;}
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px 22px 10px;
+    margin-bottom:16px;
+    box-shadow:0 1px 3px rgba(184,58,110,.05);
+  }
+  .card h2{
+    font-size:15px;
+    margin:0 0 16px;
+    text-transform:uppercase;
+    letter-spacing:.07em;
+    color:var(--accent-dark);
+    font-weight:700;
+  }
+  .q{margin-bottom:18px;}
+  .q label.q-label{
+    display:block;
+    font-size:14px;
+    font-weight:600;
+    margin-bottom:8px;
+  }
+  input[type="text"], textarea{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:9px;
+    font-size:14px;
+    font-family:inherit;
+    background:#fffafc;
+    color:var(--text);
+    outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  input[type="text"]:focus, textarea:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-soft);
+    background:#fff;
+  }
+  textarea{resize:vertical;min-height:60px;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{position:relative;}
+  .chip input{position:absolute;opacity:0;pointer-events:none;}
+  .chip span{
+    display:inline-block;
+    padding:7px 13px;
+    border:1px solid var(--line);
+    border-radius:999px;
+    font-size:13.5px;
+    cursor:pointer;
+    background:#fffafc;
+    transition:.15s;
+    user-select:none;
+  }
+  .chip input:checked + span{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+  }
+  .chip span:hover{border-color:var(--accent);}
+
+  .actions{text-align:center;margin-top:28px;}
+  button.primary{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:13px 34px;
+    font-size:15px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:600;
+    transition:.15s;
+    box-shadow:0 4px 14px rgba(217,79,138,.3);
+  }
+  button.primary:hover{background:var(--accent-dark);}
+  button.primary:active{transform:translateY(1px);}
+
+  #summary{display:none;}
+  .summary-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:26px;
+    box-shadow:0 2px 10px rgba(184,58,110,.07);
+  }
+  .summary-card h2{margin:0 0 4px;font-size:20px;color:var(--accent-dark);}
+  .summary-card .meta{color:var(--muted);font-size:13.5px;margin:0 0 22px;}
+  .s-block{border-top:1px solid var(--line);padding:13px 0;}
+  .s-block:first-of-type{border-top:none;padding-top:0;}
+  .s-block .s-title{
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:.07em;
+    color:var(--muted);
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  .s-block .s-content{font-size:14.5px;}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;}
+  .tag{
+    background:var(--accent-soft);
+    color:var(--accent-dark);
+    border-radius:999px;
+    padding:4px 11px;
+    font-size:13px;
+    font-weight:600;
+  }
+  .empty{color:var(--muted);font-style:italic;font-size:13.5px;}
+  .summary-actions{
+    margin-top:22px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .summary-actions button{
+    padding:10px 18px;
+    border-radius:9px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    border:1px solid var(--line);
+    background:#fffafc;
+    color:var(--text);
+    transition:.15s;
+    min-width:150px;
+  }
+  .summary-actions button:hover{border-color:var(--accent);color:var(--accent-dark);}
+  .summary-actions button.ok{
+    background:#e6f7ec;
+    border-color:#8dd6a3;
+    color:#1f7a3a;
+  }
+  .summary-actions button.err{
+    background:#fdecec;
+    border-color:#e8a8a8;
+    color:#a82828;
+  }
+  .note{
+    text-align:center;
+    color:var(--muted);
+    font-size:12.5px;
+    margin-top:16px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Анкета предпочтений</h1>
+    <p>Заполни то, что считаешь нужным. Сводка формируется автоматически.</p>
+  </header>
+
+  <form id="quiz" onsubmit="return false;">
+
+    <div class="card">
+      <h2>Идентификация</h2>
+      <div class="q">
+        <label class="q-label" for="name">Имя или ник</label>
+        <input type="text" id="name">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Вкусы и предпочтения</h2>
+      <div class="q">
+        <label class="q-label" for="color">Любимый цвет (и оттенки, если есть)</label>
+        <input type="text" id="color">
+      </div>
+      <div class="q">
+        <label class="q-label" for="texture">Любимые текстуры и материалы</label>
+        <input type="text" id="texture" placeholder="Мягкое, гладкое, шершавое, дерево, камень, шёлк...">
+      </div>
+      <div class="q">
+        <label class="q-label" for="fandom">Бренды, вселенные, авторы, исполнители</label>
+        <input type="text" id="fandom">
+      </div>
+      <div class="q">
+        <label class="q-label">Стиль</label>
+        <div class="chips" id="style">
+          <label class="chip"><input type="checkbox" value="Минимализм"><span>Минимализм</span></label>
+          <label class="chip"><input type="checkbox" value="Классика"><span>Классика</span></label>
+          <label class="chip"><input type="checkbox" value="Кэжуал"><span>Кэжуал</span></label>
+          <label class="chip"><input type="checkbox" value="Спорт"><span>Спорт</span></label>
+          <label class="chip"><input type="checkbox" value="Винтаж"><span>Винтаж</span></label>
+          <label class="chip"><input type="checkbox" value="Яркое и необычное"><span>Яркое и необычное</span></label>
+          <label class="chip"><input type="checkbox" value="Уютное и домашнее"><span>Уютное и домашнее</span></label>
+          <label class="chip"><input type="checkbox" value="Строгое и сдержанное"><span>Строгое и сдержанное</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Ценности и ритм</h2>
+      <div class="q">
+        <label class="q-label">Что важнее</label>
+        <div class="chips" id="value">
+          <label class="chip"><input type="radio" name="value" value="Впечатления и эмоции"><span>Впечатления и эмоции</span></label>
+          <label class="chip"><input type="radio" name="value" value="Практичные и полезные вещи"><span>Практичные и полезные вещи</span></label>
+          <label class="chip"><input type="radio" name="value" value="И то, и другое по настроению"><span>И то, и другое по настроению</span></label>
+        </div>
+      </div>
+      <div class="q">
+        <label class="q-label">Темп жизни</label>
+        <div class="chips" id="temper">
+          <label class="chip"><input type="radio" name="temper" value="Домосед(ка)"><span>Домосед(ка)</span></label>
+          <label class="chip"><input type="radio" name="temper" value="Всегда в движении"><span>Всегда в движении</span></label>
+          <label class="chip"><input type="radio" name="temper" value="Зависит от недели"><span>Зависит от недели</span></label>
+        </div>
+      </div>
+      <div class="q">
+        <label class="q-label" for="relax">Как расслабляешься</label>
+        <input type="text" id="relax">
+      </div>
+      <div class="q">
+        <label class="q-label" for="recharge">Что тебя перезагружает и наполняет</label>
+        <textarea id="recharge" placeholder="Тишина, люди, природа, музыка, движение, одиночество..."></textarea>
+      </div>
+      <div class="q">
+        <label class="q-label" for="energy">Что забирает энергию</label>
+        <textarea id="energy" placeholder="Шум, толпа, неопределённость, спешка..."></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Глубокие вопросы</h2>
+      <div class="q">
+        <label class="q-label" for="joy">Что тебя по-настоящему радует</label>
+        <textarea id="joy"></textarea>
+      </div>
+      <div class="q">
+        <label class="q-label" for="meaning">Что для тебя важно в вещах, которые тебя окружают</label>
+        <textarea id="meaning" placeholder="История, качество, смысл, простота, красота..."></textarea>
+      </div>
+      <div class="q">
+        <label class="q-label" for="avoid">Что не любишь, что раздражает или чего избегаешь</label>
+        <textarea id="avoid" placeholder="Аллергии, запахи, темы, материалы, форматы..."></textarea>
+      </div>
+      <div class="q">
+        <label class="q-label" for="dream">Желания или планы, которые давно откладываешь</label>
+        <textarea id="dream"></textarea>
+      </div>
+      <div class="q">
+        <label class="q-label" for="care">Что для тебя значит забота</label>
+        <textarea id="care" placeholder="Как ты её чувствуешь, в чём она для тебя проявляется"></textarea>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="primary" onclick="buildSummary()">Сформировать сводку</button>
+    </div>
+  </form>
+
+  <section id="summary">
+    <div class="summary-card" id="summaryCard">
+      <h2 id="s-name">Профиль</h2>
+      <p class="meta">Сводка предпочтений</p>
+
+      <div class="s-block"><div class="s-title">Любимый цвет</div><div class="s-content" id="s-color"><span class="empty">не указано</span></div></div>
+      <div class="s-block"><div class="s-title">Текстуры и материалы</div><div class="s-content" id="s-texture"><span class="empty">не указано</span></div></div>
+      <div class="s-block"><div class="s-title">Бренды, вселенные, авторы</div><div class="s-content" id="s-fandom"><span class="empty">не указано</span></div></div>
+      <div class="s-block"><div class="s-title">Стиль</div><div class="s-content" id="s-style"><span class="empty">не указано</span></div></div>
+      <div class="s-block"><div class="s-title">Что важнее</div><div class="s-content" id="s-value"><span class="empty">не указано</span></div></div>
+      <div class="s-block"><div class="s-title">Темп жизни</div><div class="s-content" id="s-temper"><span class="empty">не указано</span></div></div>
+      <div class="s-block"><div class="s-title">Расслабление</div><div class="s-content" id="s-relax"><span class="empty">не указано</span></div></div>
+      <div class="s-block"><div class="s-title">Перезагрузка</div><div class="s-content" id="s-recharge"><span class="empty">не указано</span></div></div>
+      <div class="s-block"><div class="s-title">Забирает энергию</div><div class="s-content" id="s-energy"><span class="empty">не указано</span></div></div>
+      <div class="s-block"><div class="s-title">Радует</div><div class="s-content" id="s-joy"><span class="empty">не указано</span></div></div>
+      <div class="s-block"><div class="s-title">Важно в вещах</div><div class="s-content" id="s-meaning"><span class="empty">не указано</span></div></div>
+      <div class="s-block"><div class="s-title">Не любит</div><div class="s-content" id="s-avoid"><span class="empty">не указано</span></div></div>
+      <div class="s-block"><div class="s-title">Отложенные желания</div><div class="s-content" id="s-dream"><span class="empty">не указано</span></div></div>
+      <div class="s-block"><div class="s-title">Что значит забота</div><div class="s-content" id="s-care"><span class="empty">не указано</span></div></div>
+    </div>
+
+    <div class="summary-actions">
+      <button type="button" id="btnPdf" onclick="savePdf()">Сохранить в PDF</button>
+      <button type="button" id="btnCopy" onclick="copySummary()">Скопировать текстом</button>
+      <button type="button" onclick="resetAll()">Заполнить заново</button>
+    </div>
+    <p class="note">PDF открывается в диалоге печати — выбери «Сохранить как PDF».</p>
+  </section>
+
+</div>
+
+<script>
+  /* ===== Утилиты ===== */
+  function getCheckedValues(containerId){
+    const nodes = document.querySelectorAll('#' + containerId + ' input:checked');
+    return Array.from(nodes).map(n => n.value);
+  }
+  function getRadioValue(name){
+    const el = document.querySelector('input[name="' + name + '"]:checked');
+    return el ? el.value : '';
+  }
+  function textOrEmpty(id){
+    const v = document.getElementById(id).value.trim();
+    return v ? v : '';
+  }
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  }
+  function setBlock(id, value){
+    const el = document.getElementById(id);
+    if(!value || (Array.isArray(value) && value.length === 0)){
+      el.innerHTML = '<span class="empty">не указано</span>';
+      return;
+    }
+    if(Array.isArray(value)){
+      el.innerHTML = '<div class="tags">' + value.map(v => '<span class="tag">' + escapeHtml(v) + '</span>').join('') + '</div>';
+    } else {
+      el.textContent = value;
+    }
+  }
+  function flashButton(btn, text, cls){
+    const original = btn.dataset.orig || btn.textContent;
+    btn.dataset.orig = original;
+    btn.textContent = text;
+    btn.classList.remove('ok','err');
+    if(cls) btn.classList.add(cls);
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.classList.remove('ok','err');
+    }, 2200);
+  }
+
+  /* ===== Сборка сводки ===== */
+  function buildSummary(){
+    const name = textOrEmpty('name');
+    document.getElementById('s-name').textContent = name ? name : 'Профиль';
+
+    setBlock('s-color', textOrEmpty('color'));
+    setBlock('s-texture', textOrEmpty('texture'));
+    setBlock('s-fandom', textOrEmpty('fandom'));
+    setBlock('s-style', getCheckedValues('style'));
+    setBlock('s-value', getRadioValue('value'));
+    setBlock('s-temper', getRadioValue('temper'));
+    setBlock('s-relax', textOrEmpty('relax'));
+    setBlock('s-recharge', textOrEmpty('recharge'));
+    setBlock('s-energy', textOrEmpty('energy'));
+    setBlock('s-joy', textOrEmpty('joy'));
+    setBlock('s-meaning', textOrEmpty('meaning'));
+    setBlock('s-avoid', textOrEmpty('avoid'));
+    setBlock('s-dream', textOrEmpty('dream'));
+    setBlock('s-care', textOrEmpty('care'));
+
+    document.getElementById('quiz').style.display = 'none';
+    document.getElementById('summary').style.display = 'block';
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  /* ===== PDF через печать iframe ===== */
+  function savePdf(){
+    const btn = document.getElementById('btnPdf');
+    const card = document.getElementById('summaryCard');
+
+    // Собираем автономный HTML для печати
+    const styles = `
+      <style>
+        @page { size: A4; margin: 18mm 16mm; }
+        *{box-sizing:border-box;}
+        body{
+          font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
+          color:#2a1f26;
+          line-height:1.5;
+          margin:0;
+          padding:0;
+        }
+        h2{font-size:20px;margin:0 0 4px;color:#b83a6e;}
+        .meta{color:#8a7380;font-size:13px;margin:0 0 20px;}
+        .s-block{border-top:1px solid #f0d8e2;padding:11px 0;}
+        .s-block:first-of-type{border-top:none;padding-top:0;}
+        .s-title{
+          font-size:11px;
+          text-transform:uppercase;
+          letter-spacing:.07em;
+          color:#8a7380;
+          font-weight:700;
+          margin-bottom:5px;
+        }
+        .s-content{font-size:14px;}
+        .tags{display:flex;flex-wrap:wrap;gap:6px;}
+        .tag{
+          background:#fce4ee;
+          color:#b83a6e;
+          border-radius:999px;
+          padding:3px 10px;
+          font-size:12.5px;
+          font-weight:600;
+        }
+        .empty{color:#8a7380;font-style:italic;font-size:13px;}
+      </style>
+    `;
+
+    const contentHtml = card.outerHTML;
+    const fullHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Профиль предпочтений</title>' + styles + '</head><body>' + contentHtml + '</body></html>';
+
+    // Создаём скрытый iframe
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    iframe.style.visibility = 'hidden';
+    document.body.appendChild(iframe);
+
+    try{
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      doc.open();
+      doc.write(fullHtml);
+      doc.close();
+
+      // Ждём загрузки и вызываем печать
+      const doPrint = () => {
+        try{
+          iframe.contentWindow.focus();
+          iframe.contentWindow.print();
+          flashButton(btn, 'Открыт диалог печати', 'ok');
+        }catch(e){
+          console.error(e);
+          flashButton(btn, 'Ошибка печати', 'err');
+        }
+        // Убираем iframe чуть позже, чтобы диалог успел открыться
+        setTimeout(() => {
+          if(iframe.parentNode) iframe.parentNode.removeChild(iframe);
+        }, 1500);
+      };
+
+      if(iframe.contentWindow.document.readyState === 'complete'){
+        setTimeout(doPrint, 120);
+      } else {
+        iframe.onload = () => setTimeout(doPrint, 120);
+      }
+    }catch(e){
+      console.error(e);
+      if(iframe.parentNode) iframe.parentNode.removeChild(iframe);
+      flashButton(btn, 'Ошибка', 'err');
+    }
+  }
+
+  /* ===== Копирование текстом (без navigator.clipboard) ===== */
+  function buildPlainText(){
+    const get = id => {
+      const el = document.getElementById(id);
+      return (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
+    };
+    const name = get('s-name');
+    const blocks = [
+      ['Цвет', 's-color'],
+      ['Текстуры и материалы', 's-texture'],
+      ['Бренды, вселенные, авторы', 's-fandom'],
+      ['Стиль', 's-style'],
+      ['Что важнее', 's-value'],
+      ['Темп жизни', 's-temper'],
+      ['Расслабление', 's-relax'],
+      ['Перезагрузка', 's-recharge'],
+      ['Забирает энергию', 's-energy'],
+      ['Радует', 's-joy'],
+      ['Важно в вещах', 's-meaning'],
+      ['Не любит', 's-avoid'],
+      ['Отложенные желания', 's-dream'],
+      ['Что значит забота', 's-care']
+    ];
+    let out = name + '\n\n';
+    blocks.forEach(([label, id]) => {
+      const v = get(id);
+      if(v && v !== 'не указано') out += label + ': ' + v + '\n';
+    });
+    return out.trim();
+  }
+
+  function copySummary(){
+    const btn = document.getElementById('btnCopy');
+    const text = buildPlainText();
+    if(!text){
+      flashButton(btn, 'Нечего копировать', 'err');
+      return;
+    }
+
+    // Универсальный способ — работает и в file://, и в https://
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.left = '0';
+    ta.style.width = '2em';
+    ta.style.height = '2em';
+    ta.style.padding = '0';
+    ta.style.border = 'none';
+    ta.style.outline = 'none';
+    ta.style.boxShadow = 'none';
+    ta.style.background = 'transparent';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+
+    let ok = false;
+    try{
+      ta.focus();
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length);
+      ok = document.execCommand('copy');
+    }catch(e){
+      ok = false;
+    }
+    document.body.removeChild(ta);
+
+    if(ok){
+      flashButton(btn, 'Скопировано ✓', 'ok');
+    } else {
+      // Последний шанс — модалка с текстом для ручного копирования
+      showManualCopy(text);
+      flashButton(btn, 'Скопируй вручную', 'err');
+    }
+  }
+
+  function showManualCopy(text){
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(42,31,38,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+    const box = document.createElement('div');
+    box.style.cssText = 'background:#fff;border-radius:14px;padding:20px;max-width:560px;width:100%;max-height:80vh;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 60px rgba(0,0,0,.3);';
+
+    const title = document.createElement('div');
+    title.textContent = 'Выдели текст и скопируй (Ctrl+C / ⌘+C)';
+    title.style.cssText = 'font-weight:700;font-size:15px;color:#b83a6e;';
+
+    const area = document.createElement('textarea');
+    area.value = text;
+    area.style.cssText = 'width:100%;min-height:280px;padding:12px;border:1px solid #f0d8e2;border-radius:10px;font:13px/1.5 monospace;resize:vertical;color:#2a1f26;background:#fffafc;';
+
+    const close = document.createElement('button');
+    close.textContent = 'Закрыть';
+    close.style.cssText = 'align-self:flex-end;padding:9px 22px;border-radius:9px;border:none;background:#d94f8a;color:#fff;font-weight:600;cursor:pointer;font-size:14px;';
+    close.onclick = () => document.body.removeChild(overlay);
+
+    box.appendChild(title);
+    box.appendChild(area);
+    box.appendChild(close);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    setTimeout(() => { area.focus(); area.select(); }, 50);
+  }
+
+  /* ===== Сброс ===== */
+  function resetAll(){
+    document.getElementById('quiz').reset();
+    document.getElementById('summary').style.display = 'none';
+    document.getElementById('quiz').style.display = 'block';
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+</script>
+</body>
+</html>
